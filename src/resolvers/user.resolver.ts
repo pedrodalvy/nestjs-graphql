@@ -3,7 +3,7 @@ import RepoService from '../repo.service';
 import { User } from '../db/models/user.entity';
 import UserInput from './input/user.input';
 
-@Resolver()
+@Resolver(() => User)
 class UserResolver {
   constructor(private readonly repoService: RepoService) {}
 

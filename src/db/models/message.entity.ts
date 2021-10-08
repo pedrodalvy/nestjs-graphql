@@ -18,8 +18,12 @@ export class Message {
   id: number;
 
   @Field()
-  @Column({ name: 'author_id' })
-  authorId: number;
+  @Column()
+  content: string;
+
+  @Field()
+  @Column({ name: 'user_id' })
+  userId: number;
 
   @Field()
   @CreateDateColumn({ name: 'created_at' })
@@ -33,6 +37,6 @@ export class Message {
   user: User;
 
   @ManyToOne(() => User, (user) => user.messageConnection, { primary: true })
-  @JoinColumn({ name: 'author_id' })
+  @JoinColumn({ name: 'user_id' })
   userConnection: Promise<User>;
 }
