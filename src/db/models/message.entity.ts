@@ -2,23 +2,24 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Message } from './message.entity';
+import { User } from './user.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-@Entity({ name: 'users' })
-export class User {
+@Entity({ name: 'messages' })
+export class Message {
   @Field()
   @PrimaryGeneratedColumn()
   id: number;
 
   @Field()
-  @Column()
-  email: string;
+  @Column({ name: 'author_id' })
+  authorId: number;
 
   @Field()
   @CreateDateColumn({ name: 'created_at' })
@@ -28,6 +29,10 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => Message, (message) => message.userConnection)
-  messageConnection: Promise<Message[]>;
+  @Field(() => User)
+  user: User;
+
+  @ManyToOne(() => User, (user) => user.messageConnection, { primary: true })
+  @JoinColumn({ name: 'author_id' })
+  userConnection: Promise<User>;
 }
