@@ -1,6 +1,7 @@
 import RepoService from '../repo.service';
 import {
   Args,
+  Context,
   Mutation,
   Parent,
   Query,
@@ -10,6 +11,7 @@ import {
 import { Message } from '../db/models/message.entity';
 import { User } from '../db/models/user.entity';
 import MessageInput from './input/message.input';
+import { IGraphQLContext } from '../types/graphql.types';
 
 @Resolver(() => Message)
 class MessageResolver {
@@ -44,8 +46,11 @@ class MessageResolver {
   }
 
   @ResolveField(() => User, { name: 'user' })
-  public async user(@Parent() parent): Promise<User> {
-    return this.repoService.userRepo.findOne(parent.userId);
+  public async user(
+    @Parent() parent,
+    @Context() { userLoader }: IGraphQLContext,
+  ): Promise<User> {
+    return userLoader.load(parent.userId);
   }
 }
 
