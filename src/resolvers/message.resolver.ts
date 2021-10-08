@@ -45,6 +45,13 @@ class MessageResolver {
     return this.repoService.messageRepo.save(message);
   }
 
+  @Mutation(() => Message, { nullable: true })
+  public async deleteMessage(@Args('id') id: number): Promise<void> {
+    const message = await this.repoService.messageRepo.findOneOrFail(id);
+
+    await this.repoService.messageRepo.remove(message);
+  }
+
   @ResolveField(() => User, { name: 'user' })
   public async user(
     @Parent() parent,
