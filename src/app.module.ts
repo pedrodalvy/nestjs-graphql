@@ -7,7 +7,7 @@ import RepoModule from './repo.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import UserResolver from './resolvers/user.resolver';
 import MessageResolver from './resolvers/message.resolver';
-import { userLoader } from './db/loaders/users.loader';
+import { context } from './db/loaders';
 
 const graphQLImports = [UserResolver, MessageResolver];
 
@@ -19,9 +19,8 @@ const graphQLImports = [UserResolver, MessageResolver];
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
       playground: true,
-      context: {
-        userLoader: userLoader(),
-      },
+      installSubscriptionHandlers: true,
+      context,
     }),
   ],
   controllers: [AppController],

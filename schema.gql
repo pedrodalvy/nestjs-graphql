@@ -45,3 +45,7 @@ input MessageInput {
   content: String!
   userId: Float!
 }
+
+type Subscription {
+  messageAdded: Message!
+}

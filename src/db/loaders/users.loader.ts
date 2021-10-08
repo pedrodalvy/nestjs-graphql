@@ -4,16 +4,17 @@ import * as DataLoader from 'dataloader';
 
 type BatchUser = (ids: number[]) => Promise<User[]>;
 
-const batchUsers: BatchUser = async (ids: number[]) => {
+const batchUsers: BatchUser = async (userId: number[]) => {
   const userRepository = getRepository(User);
-  const users = await userRepository.findByIds(ids);
+  const users = await userRepository.findByIds(userId);
 
-  const userMap: { [key: string]: User } = {};
+  const userMap: { [userId: number]: User } = {};
+
   users.forEach((user) => {
     userMap[user.id] = user;
   });
 
-  return ids.map((id) => userMap[id]);
+  return userId.map((userId) => userMap[userId]);
 };
 
 export const userLoader = () => new DataLoader<number, User>(batchUsers);

@@ -7,11 +7,15 @@ import {
   Query,
   ResolveField,
   Resolver,
+  Subscription,
 } from '@nestjs/graphql';
 import { Message } from '../db/models/message.entity';
 import { User } from '../db/models/user.entity';
 import MessageInput from './input/message.input';
-import { IGraphQLContext } from '../types/graphql.types';
+import { PubSub } from 'graphql-subscriptions';
+import { context } from '../db/loaders';
+
+const pubSub = new PubSub();
 
 @Resolver(() => Message)
 class MessageResolver {
@@ -42,7 +46,11 @@ class MessageResolver {
 
     const message = this.repoService.messageRepo.create({ content, userId });
 
-    return this.repoService.messageRepo.save(message);
+    const newMessage = await this.repoService.messageRepo.save(message);
+
+    await pubSub.publish('messageAdded', { messageAdded: message });
+
+    return newMessage;
   }
 
   @Mutation(() => Message, { nullable: true })
@@ -52,12 +60,21 @@ class MessageResolver {
     await this.repoService.messageRepo.remove(message);
   }
 
+  @Subscription(() => Message)
+  async messageAdded() {
+    return pubSub.asyncIterator('messageAdded');
+  }
+
   @ResolveField(() => User, { name: 'user' })
   public async user(
-    @Parent() parent,
-    @Context() { userLoader }: IGraphQLContext,
+    @Parent() parent: Message,
+    @Context() { userLoader }: typeof context,
   ): Promise<User> {
-    return userLoader.load(parent.userId);
+    if (userLoader) {
+      return userLoader.load(parent.userId);
+    }
+
+    return this.repoService.userRepo.findOne(parent.userId);
   }
 }
 
